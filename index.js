@@ -34,6 +34,7 @@ module.exports = function(audioContext, stream, opts) {
   var activityCounterMin = 0;
   var activityCounterMax = 60;
   var activityCounterThresh = 5;
+  var activityCounterCurrentMax = 0;
 
   var envFreqRange = [];
   var isNoiseCapturing = true;
@@ -106,7 +107,8 @@ module.exports = function(audioContext, stream, opts) {
     } else if (average < baseLevel && activityCounter > activityCounterMin) {
       activityCounter--;
     }
-    vadState = activityCounter > activityCounterThresh;
+    activityCounterCurrentMax = Math.max(activityCounterCurrentMax,activityCounter)
+    vadState = activityCounter > activityCounterCurrentMax - 4;
 
     if (prevVadState !== vadState) {
       vadState ? onVoiceStart() : onVoiceStop();
