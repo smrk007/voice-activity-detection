@@ -35,6 +35,7 @@ module.exports = function(audioContext, stream, opts) {
   var activityCounterMax = 60;
   var activityCounterThresh = 5;
   var activityCounterCurrentMax = 0;
+  var monitorStarted = false;
 
   var envFreqRange = [];
   var isNoiseCapturing = true;
@@ -93,6 +94,13 @@ module.exports = function(audioContext, stream, opts) {
   }
 
   function monitor() {
+    
+    // Part of the hack to get the beginning of utterances
+    if (!monitorStarted) {
+      monitorStarted = true;
+      onVoiceStart();
+    }
+    
     var frequencies = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(frequencies);
 
@@ -111,7 +119,8 @@ module.exports = function(audioContext, stream, opts) {
     vadState = activityCounter > activityCounterCurrentMax - 4;
 
     if (prevVadState !== vadState) {
-      vadState ? onVoiceStart() : onVoiceStop();
+      // vadState ? onVoiceStart() : onVoiceStop();
+      vadState ? null : onVoiceStop(); // Part of the hack to get the beginning of utterances
       prevVadState = vadState;
     }
 
